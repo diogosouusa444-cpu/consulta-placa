@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Consulta de Veículo</title>
+  <style>
+    :root{--bg:#0b0f14;--card:#101826;--muted:#9fb0c7;--text:#e7eef9;--line:#1e2a3a;--btn:#2b6cff;--bad:#ff4d4d;--ok:#33d17a}
+    *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
+    body{margin:0;background:linear-gradient(180deg,#070a0f,#0b0f14);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px}
+    .wrap{width:min(980px,100%)}
+    .top{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px}
+    .brand{display:flex;gap:10px;align-items:center}
+    .logo{width:40px;height:40px;border-radius:12px;background:radial-gradient(circle at 30% 20%,#2b6cff,transparent 60%),linear-gradient(135deg,#1f2a44,#0f172a);border:1px solid var(--line)}
+    h1{font-size:18px;margin:0}
+    .sub{color:var(--muted);font-size:13px;margin:2px 0 0}
+    .card{background:rgba(16,24,38,.92);border:1px solid var(--line);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.35);overflow:hidden}
+    .pad{padding:16px}
+    .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
+    @media(max-width:820px){.grid{grid-template-columns:1fr}}
+    label{display:block;color:var(--muted);font-size:13px;margin-bottom:8px}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    input[type="text"]{flex:1;min-width:220px;background:#0b1220;border:1px solid var(--line);color:var(--text);padding:14px 12px;border-radius:14px;font-size:16px;outline:none}
+    input[type="text"]:focus{border-color:#2b6cff;box-shadow:0 0 0 3px rgba(43,108,255,.18)}
+    .btn{background:linear-gradient(135deg,var(--btn),#1fb6ff);border:none;color:#fff;padding:14px 14px;border-radius:14px;font-weight:800;font-size:15px;cursor:pointer}
+    .btn2{background:#0b1220;border:1px solid var(--line);color:var(--text);padding:12px 12px;border-radius:14px;font-weight:800;font-size:14px;cursor:pointer}
+    .hint{color:var(--muted);font-size:12px;margin-top:8px;line-height:1.35}
+    .divider{height:1px;background:var(--line)}
+    .badge{display:inline-flex;align-items:center;gap:8px;font-size:12px;padding:8px 10px;border-radius:999px;border:1px solid var(--line);background:#0b1220;color:var(--muted)}
+    .dot{width:8px;height:8px;border-radius:999px;background:var(--ok)}
+    .dot.bad{background:var(--bad)}
+    .box{border:1px solid var(--line);background:#0b1220;border-radius:14px;padding:12px}
+    .title{font-weight:900;margin:0 0 8px 0}
+    .kv{display:flex;justify-content:space-between;gap:12px;border:1px solid var(--line);background:#0b1220;border-radius:14px;padding:12px}
+    .k{color:var(--muted);font-size:12px}
+    .v{font-weight:900}
+    .small{color:var(--muted);font-size:12px}
+    .list{margin:0;padding-left:18px}
+    .list li{margin:6px 0;color:var(--text)}
+    .check{display:flex;gap:10px;align-items:flex-start;margin-top:10px}
+    .check input{margin-top:2px}
+    .warn{margin-top:12px;border:1px dashed #2b6cff55;background:#0b1220;border-radius:14px;padding:12px;color:var(--muted);font-size:12px;line-height:1.35}
+    code{color:#cfe3ff}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">
+        <div class="logo"></div>
+        <div>
+          <h1>Consulta de Veículo</h1>
+          <div class="sub">Exibe multas/restrições do veículo (sem dados pessoais). Requer API autorizada para modo real.</div>
+        </div>
+      </div>
+      <span class="badge"><span class="dot" id="dot"></span><span id="status">Pronto</span></span>
+    </div>
+
+    <div class="card">
+      <div class="pad grid">
+        <div>
+          <label for="placa">Digite a placa</label>
+          <div class="row">
+            <input id="placa" type="text" placeholder="Ex: ABC1D23 ou ABC1234" maxlength="8" />
+            <button class="btn" id="btnConsultar">Consultar</button>
+            <button class="btn2" id="btnLimpar">Limpar</button>
+          </div>
+
+          <div class="check">
+            <input id="consent" type="checkbox" />
+            <label for="consent" style="margin:0;">
+              Confirmo que tenho <b>autorização</b> para consultar este veículo e aceito os termos.
+            </label>
+          </div>
+
+          <div class="hint">
+            Formatos aceitos: <b>ABC1234</b> (antiga) e <b>ABC1D23</b> (Mercosul).
+          </div>
+
+          <div class="warn">
+            ⚠️ Este projeto vem em <b>DEMO</b>. Para “multas e restrições reais”, você precisa ligar uma
+            <b>API autorizada</b> no backend. Eu não ajudo com puxada ilegal/base vazada.
+          </div>
+
+          <div class="box" style="margin-top:12px;">
+            <p class="title">Configuração rápida</p>
+            <div class="small">
+              No final do arquivo tem a variável <code>API_BASE</code>.  
+              Se seu backend rodar em outro domínio, coloque lá.
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label>Dados do veículo</label>
+          <div id="dados">
+            <div class="kv"><div><div class="k">Placa</div><div class="v" id="rPlaca">—</div></div><div class="small" id="rFonte">—</div></div>
+            <div class="kv"><div><div class="k">Marca / Modelo</div><div class="v" id="rModelo">—</div></div><div class="small" id="rUF">—</div></div>
+            <div class="kv"><div><div class="k">Ano</div><div class="v" id="rAno">—</div></div><div class="small" id="rSit">—</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="pad grid">
+        <div class="box">
+          <p class="title">Restrições</p>
+          <ul class="list" id="restricoes">
+            <li>—</li>
+          </ul>
+        </div>
+
+        <div class="box">
+          <p class="title">Multas</p>
+          <div class="small" id="multasResumo">—</div>
+          <ul class="list" id="multas">
+            <li>—</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ✅ Se o backend estiver em outro domínio, coloque a URL aqui:
+    // Ex: const API_BASE = "https://seu-backend.onrender.com";
+    const API_BASE = "";
+
+    const placaEl = document.getElementById("placa");
+    const consentEl = document.getElementById("consent");
+    const btnConsultar = document.getElementById("btnConsultar");
+    const btnLimpar = document.getElementById("btnLimpar");
+
+    const dot = document.getElementById("dot");
+    const statusEl = document.getElementById("status");
+
+    const rPlaca = document.getElementById("rPlaca");
+    const rModelo = document.getElementById("rModelo");
+    const rAno = document.getElementById("rAno");
+    const rUF = document.getElementById("rUF");
+    const rSit = document.getElementById("rSit");
+    const rFonte = document.getElementById("rFonte");
+
+    const restricoesEl = document.getElementById("restricoes");
+    const multasEl = document.getElementById("multas");
+    const multasResumoEl = document.getElementById("multasResumo");
+
+    function setStatus(ok, text){
+      statusEl.textContent = text;
+      dot.classList.toggle("bad", !ok);
+    }
+
+    function normalizePlate(v){
+      return (v||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,7);
+    }
+
+    function isValidPlate(p){
+      const antiga = /^[A-Z]{3}[0-9]{4}$/;
+      const mercosul = /^[A-Z]{3}[0-9]{1}[A-Z]{1}[0-9]{2}$/;
+      return antiga.test(p) || mercosul.test(p);
+    }
+
+    function resetUI(){
+      rPlaca.textContent = "—";
+      rModelo.textContent = "—";
+      rAno.textContent = "—";
+      rUF.textContent = "—";
+      rSit.textContent = "—";
+      rFonte.textContent = "—";
+      restricoesEl.innerHTML = "<li>—</li>";
+      multasResumoEl.textContent = "—";
+      multasEl.innerHTML = "<li>—</li>";
+    }
+
+    function render(data){
+      rPlaca.textContent = data.placa || "—";
+      const v = data.veiculo || {};
+      rModelo.textContent = `${v.marca || "—"} / ${v.modelo || "—"}`;
+      rAno.textContent = v.ano ?? "—";
+      rUF.textContent = v.uf ? `UF: ${v.uf}` : "—";
+      rSit.textContent = data.situacao ? `Situação: ${data.situacao}` : "—";
+      rFonte.textContent = data.fonte || "—";
+
+      const restr = Array.isArray(data.restricoes) ? data.restricoes : [];
+      restricoesEl.innerHTML = restr.length
+        ? restr.map(r => `<li><b>${escapeHtml(r.tipo)}</b>: ${escapeHtml(r.status)}</li>`).join("")
+        : "<li>—</li>";
+
+      const m = data.multas || {};
+      const itens = Array.isArray(m.itens) ? m.itens : [];
+      if(itens.length){
+        multasResumoEl.textContent = `Total: ${m.total ?? itens.length} | Valor: R$ ${Number(m.valor_total ?? 0).toFixed(2)}`;
+        multasEl.innerHTML = itens.map(x => (
+          `<li>${escapeHtml(x.data)} — ${escapeHtml(x.descricao)} — <b>R$ ${Number(x.valor).toFixed(2)}</b> (${escapeHtml(x.status)})</li>`
+        )).join("");
+      } else {
+        multasResumoEl.textContent = "—";
+        multasEl.innerHTML = "<li>—</li>";
+      }
+    }
+
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    async function consultar(){
+      const placa = normalizePlate(placaEl.value);
+      placaEl.value = placa;
+
+      if(!consentEl.checked){
+        setStatus(false, "Marque o consentimento");
+        alert("Marque o consentimento para consultar.");
+        return;
+      }
+
+      if(!isValidPlate(placa)){
+        setStatus(false, "Placa inválida");
+        alert("Placa inválida. Use ABC1234 ou ABC1D23.");
+        return;
+      }
+
+      setStatus(true, "Consultando...");
+      resetUI();
+      rPlaca.textContent = placa;
+
+      try{
+        const resp = await fetch(`${API_BASE}/api/consulta?placa=${encodeURIComponent(placa)}`, {
+          headers: { "Accept":"application/json" }
+        });
+        const data = await resp.json();
+        if(!resp.ok){
+          throw new Error(data?.error || "Erro na consulta");
+        }
+        render(data);
+        setStatus(true, "Concluído");
+      } catch(e){
+        setStatus(false, "Erro");
+        alert(String(e.message || e));
+      }
+    }
+
+    placaEl.addEventListener("input", () => {
+      placaEl.value = normalizePlate(placaEl.value);
+      setStatus(true,"Pronto");
+    });
+
+    btnConsultar.addEventListener("click", consultar);
+    btnLimpar.addEventListener("click", () => {
+      placaEl.value = "";
+      consentEl.checked = false;
+      resetUI();
+      setStatus(true,"Pronto");
+    });
+
+    resetUI();
+    setStatus(true,"Pronto");
+  </script>
+</body>
+  </html>
+
